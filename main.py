@@ -73,7 +73,7 @@ def calculate_bottomhole_pressure_from_excel(excel_path):
 
 if __name__ == "__main__":
 
-    excel_path = r"C:\Users\fy\Desktop\4-15\焦页4HF\焦页4HF压裂数据\焦页4HF井第1段压裂施工\压裂\2013-12-15焦页4HF井第一段压裂施工数据（秒点）.SVD.xlsx"
+    excel_path = r"C:\Users\fy\Desktop\4-15\4-15\焦页4HF\焦页4HF压裂数据\焦页4HF井第1段压裂施工\压裂\Pump data.xlsx"
     try:
         time_in_seconds, bottomholepressure, fluid_integral, tubing_friction_integral, perforation_friction = calculate_bottomhole_pressure_from_excel(excel_path)
         pressure_curve(time_in_seconds, bottomholepressure)
