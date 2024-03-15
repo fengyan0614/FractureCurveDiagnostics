@@ -43,7 +43,7 @@ def calculate_bottomhole_pressure_from_excel(excel_path):
     # 井筒内携沙液柱静压力
     fluid_integral = cfcpif(displacement_per_second,  sand_concentration, density_sand, density_fluid, g, well_depth_Z, well_diameter)
     # 井筒流动摩阻
-    tubing_friction_integral = ctfi(displacement_per_second, sand_concentration, density_sand,density_fluid, well_diameter, well_length_L, wellbore_roughness, fluid_viscosity)
+    tubing_friction_integral = ctfi(displacement_per_second, sand_concentration, density_sand,density_fluid,  well_length_L, well_diameter, wellbore_roughness, fluid_viscosity)
     # 计算孔眼摩阻
     perforation_friction = cpf(displacement_per_second, density_fluid, density_sand, sand_concentration, perforation_quantity, pdiameter,perforation_flow_coefficient)
     # 计算井底净压力
@@ -79,4 +79,5 @@ if __name__ == "__main__":
         pressure_curve(time_in_seconds, bottomholepressure)
     except Exception as e:
         print(f"An error occurred: {e}")
+
         traceback.print_exc()  # 这将打印错误的堆栈跟踪信息
