@@ -1,45 +1,38 @@
 #  Staticpressureofliquidcolumn.py
 import numpy as np
 
+def cfcpif(Q_fluid, Vp_proppant, Proppantmidu, fluidmidu, g, Z, D, detaTime=1):
+    deta_Z = []  # 存储各段时间内质点位移增量
+    P_well_g = []  # 存储各段时间内的压力
 
-def cfcpif(displacement_per_second, sand_concentration, density_sandu, density_fluid, g, well_depth_Z, well_diameter,
-           time_step=1):
-    pwh_list = []  # 静压力列表
-    well_Z = []  # 井筒段长度列表
-    well_mix_midu = []  # 混合液密度列表
+    for k in range(len(Q_fluid)):
+        v = 4 * Q_fluid[k] / np.pi / D ** 2  # 计算当前时刻井筒流速
+        deta_Z.append(v * detaTime)  # 计算位移增量
 
-    for k, displacement in enumerate(displacement_per_second):
-        # 新增液柱段长度
-        new_segment_length = displacement * time_step / (np.pi * (well_diameter / 2) ** 2)
-
-        # 计算混合密度
-        new_segment_density = ((1 - sand_concentration[k]) * density_fluid +
-                               sand_concentration[k] * density_sandu)
-
-        # 如果新段加上现有液柱长度不会超过井深，则直接添加
-        if sum(well_Z) + new_segment_length <= well_depth_Z:
-            well_Z.append(new_segment_length)
-            well_mix_midu.append(new_segment_density)
+        if np.sum(deta_Z) < Z:  # 判断总位移是否小于井深
+            well_Z = deta_Z + [Z - np.sum(deta_Z)]  # 记录液柱段长度
+            well_Vp = list(Vp_proppant[:k + 1]) + [0]  # 记录液柱段的砂比
         else:
-            # 如果累积长度超过了井深，需要调整最顶端液柱段的长度
-            excess_length = (sum(well_Z) + new_segment_length) - well_depth_Z
-            # 找到足够删除的长度
-            while excess_length > 0 and well_Z:
-                if well_Z[0] > excess_length:
-                    well_Z[0] -= excess_length
-                    excess_length = 0
-                else:
-                    excess_length -= well_Z.pop(0)
-                    well_mix_midu.pop(0)
-            # 添加新的液柱段到列表
-            well_Z.append(new_segment_length)
-            well_mix_midu.append(new_segment_density)
+            sum_so_far = 0
+            boundary = 0
 
-        # 确保well_Z和well_mix_midu的长度一致
-        assert len(well_Z) == len(well_mix_midu), "well_Z和well_mix_midu的长度必须一致"
+            # 根据总位移判断液柱段长度和砂比
+            for i in range(k, -1, -1):
+                sum_so_far += deta_Z[i]
+                if sum_so_far > Z:
+                    boundary = i
+                    break
+            well_Z = [deta_Z[i] for i in range(k, boundary, -1)]
+            well_Z = well_Z + [Z - np.sum(well_Z)]
+            well_Vp = list(Vp_proppant[i] for i in range(k, boundary, -1)) + [Vp_proppant[boundary]]
 
-        # 计算当前时间步的静压力
-        P_well_g = np.sum(np.multiply(well_Z, well_mix_midu)) * g
-        pwh_list.append(P_well_g)
+        # 确保砂比的长度和液柱段的长度一致
+        while len(well_Vp) < len(well_Z):
+            well_Vp.append(well_Vp[-1])
 
-    return pwh_list
+        # 计算混合液密度
+        well_mix_midu = (1 - np.array(well_Vp)) * fluidmidu + np.array(well_Vp) * Proppantmidu
+        # 计算压力，存入 P_well_g
+        P_well_g.append(np.sum(well_mix_midu * g * np.array(well_Z)))
+
+    return P_well_g  # 返回压力部分
