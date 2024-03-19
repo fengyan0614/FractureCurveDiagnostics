@@ -32,8 +32,8 @@ time_in_seconds = data['时间s']
 # 其它参数定义
 well_depth_Z = 2636  # 井深，单位为米
 well_length_L = 4006  # 井筒长度，单位为米
-density_sand = 2500  # 砂的密度，单位 kg/m³
-density_fluid = 1004.5  # 流体的密度，单位 kg/m³
+density_sand = 1550  # 支撑剂密度，单位 kg/m³
+density_fluid = 1004.5  # 压裂液密度，单位 kg/m³
 well_diameter = 0.14  # 井筒直径，单位 m
 min_horizontal_stress = 48600000  # 最小水平主应力，单位 Pa
 pdiameter = 0.0095  # 孔眼直径 m
